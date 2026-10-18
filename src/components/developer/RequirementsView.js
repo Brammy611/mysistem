@@ -173,7 +173,7 @@ export const RequirementsView = () => {
                     <div className="text-left">
                       <span className="text-[10px] text-slate-400 block">Lead PIC:</span>
                       <span className="font-semibold text-slate-700">
-                        {pic?.name.split(' ')[0] || 'Unassigned'}
+                        {pic?.name ? pic.name.split(' ')[0] : pic?.email ? pic.email.split('@')[0] : 'Unassigned'}
                       </span>
                     </div>
                   </div>

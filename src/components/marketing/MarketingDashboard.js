@@ -67,7 +67,7 @@ export const MarketingDashboard = () => {
               <Megaphone className="w-3.5 h-3.5" /> BookQu Growth & Marketing Hub
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
-              Halo, {currentUser.name}! ✨
+              Halo, {currentUser?.name || 'Marketer'}! ✨
             </h1>
             <p className="text-xs sm:text-sm text-purple-100/90 mt-1 max-w-xl">
               Fokus kampanye bulan ini: BookQu October Healing & diskon membership akhir pekan.

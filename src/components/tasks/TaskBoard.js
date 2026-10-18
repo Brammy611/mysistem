@@ -136,7 +136,7 @@ export const TaskBoard = ({ division = 'developer' }) => {
               .filter((u) => u.role === 'owner' || u.division === division)
               .map((u) => (
                 <option key={u.id} value={u.id}>
-                  {u.name}
+                  {u.name || u.email || 'User'}
                 </option>
               ))}
           </select>
@@ -325,12 +325,12 @@ export const TaskBoard = ({ division = 'developer' }) => {
                             {assignee ? (
                               <>
                                 <img
-                                  src={assignee.avatar}
-                                  alt={assignee.name}
+                                  src={assignee.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(assignee.name || assignee.email || 'User')}&background=random`}
+                                  alt={assignee.name || 'User'}
                                   className="w-5 h-5 rounded-full object-cover ring-1 ring-slate-200"
                                 />
                                 <span className="font-semibold text-slate-700 truncate max-w-[80px]">
-                                  {assignee.name.split(' ')[0]}
+                                  {assignee.name ? assignee.name.split(' ')[0] : assignee.email ? assignee.email.split('@')[0] : 'User'}
                                 </span>
                               </>
                             ) : (

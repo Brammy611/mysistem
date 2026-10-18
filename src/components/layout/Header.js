@@ -178,13 +178,13 @@ export const Header = ({ onToggleSidebar }) => {
             className="flex items-center gap-2 p-1.5 pl-2 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all border border-slate-200/80"
           >
             <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
+              src={currentUser?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.name || currentUser?.email || 'User')}&background=random`}
+              alt={currentUser?.name || 'User'}
               className="w-7 h-7 rounded-lg object-cover ring-1 ring-slate-300"
             />
             <div className="text-left hidden lg:block leading-tight pr-1">
-              <div className="text-xs font-bold text-slate-800">{currentUser.name}</div>
-              <div className="text-[10px] text-slate-500 capitalize">{currentUser.role}</div>
+              <div className="text-xs font-bold text-slate-800">{currentUser?.name || currentUser?.email || 'User'}</div>
+              <div className="text-[10px] text-slate-500 capitalize">{currentUser?.role || ''}</div>
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5" />
           </button>
@@ -214,13 +214,13 @@ export const Header = ({ onToggleSidebar }) => {
                     >
                       <div className="flex items-center gap-3">
                         <img
-                          src={user.avatar}
-                          alt={user.name}
+                          src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.email || 'User')}&background=random`}
+                          alt={user.name || 'User'}
                           className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-200"
                         />
                         <div>
                           <p className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                            {user.name}
+                            {user.name || user.email || 'User'}
                             {isCurrent && <UserCheck className="w-3.5 h-3.5 text-indigo-600" />}
                           </p>
                           <p className="text-[11px] text-slate-500">{user.title}</p>

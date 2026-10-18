@@ -132,7 +132,7 @@ export const ContentBoardView = () => {
               .filter((u) => u.role === 'owner' || u.division === 'marketing')
               .map((u) => (
                 <option key={u.id} value={u.id}>
-                  {u.name}
+                  {u.name || u.email || 'User'}
                 </option>
               ))}
           </select>
@@ -239,7 +239,7 @@ export const ContentBoardView = () => {
 
                           <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
                             <span className="font-semibold text-slate-700 truncate max-w-[90px]">
-                              {assignee?.name.split(' ')[0] || '-'}
+                              {assignee?.name ? assignee.name.split(' ')[0] : assignee?.email ? assignee.email.split('@')[0] : '-'}
                             </span>
 
                             {task.productionDeadline && (

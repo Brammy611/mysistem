@@ -45,7 +45,13 @@ export const AuthProvider = ({ children }) => {
         .single();
       
       if (error) throw error;
-      setCurrentUser(data);
+      const u = data || {};
+      const user = {
+        ...u,
+        name: u.name || (u.email ? u.email.split('@')[0] : 'User'),
+        avatar: u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || u.email || 'User')}&background=random`,
+      };
+      setCurrentUser(user);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -58,9 +64,10 @@ export const AuthProvider = ({ children }) => {
       const { data, error } = await supabase.from('profiles').select('*');
       if (error) throw error;
       // Memetakan ke format lama (name, id, role, dll)
-      const mapped = data.map(p => ({
+      const mapped = (data || []).map(p => ({
         id: p.id,
-        name: p.name || p.email.split('@')[0],
+        name: p.name || (p.email ? p.email.split('@')[0] : 'User'),
+        avatar: p.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name || p.email || 'User')}&background=random`,
         email: p.email,
         role: p.role,
         division: p.role === 'developer' || p.role === 'marketing' ? p.role : 'management'

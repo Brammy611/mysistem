@@ -162,12 +162,12 @@ export const TeamOverview = () => {
                 <div>
                   <div className="flex items-center gap-3 mb-4">
                     <img
-                      src={user.avatar}
-                      alt={user.name}
+                      src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.email || 'User')}&background=random`}
+                      alt={user.name || 'User'}
                       className="w-12 h-12 rounded-xl object-cover ring-2 ring-slate-100"
                     />
                     <div>
-                      <h4 className="font-bold text-slate-900 text-sm">{user.name}</h4>
+                      <h4 className="font-bold text-slate-900 text-sm">{user.name || user.email || 'User'}</h4>
                       <p className="text-xs text-slate-500">{user.title}</p>
                       <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full capitalize bg-slate-100 text-slate-700">
                         {user.role} ({user.division})

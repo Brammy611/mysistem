@@ -368,7 +368,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
             <ShieldAlert className="w-4 h-4 text-indigo-600 shrink-0" />
             <div className="overflow-hidden">
               <p className="text-[11px] font-bold text-slate-800 truncate">
-                Role: {currentUser.name}
+                Role: {currentUser?.name || currentUser?.role || 'User'}
               </p>
               <p className="text-[10px] text-slate-500 truncate">
                 {isOwner

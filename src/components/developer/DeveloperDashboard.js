@@ -65,7 +65,7 @@ export const DeveloperDashboard = () => {
               <Code2 className="w-3.5 h-3.5" /> BookQu Developer Workspace
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
-              Halo, {currentUser.name}! 🚀
+              Halo, {currentUser?.name || 'Developer'}! 🚀
             </h1>
             <p className="text-xs sm:text-sm text-blue-100/90 mt-1 max-w-xl">
               Fokus sprint saat ini: Pembatalan booking & integrasi payment QRIS BookQu.

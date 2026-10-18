@@ -41,7 +41,12 @@ export const ProfileService = {
   async getAll() {
     const { data, error } = await supabase.from('profiles').select('*');
     throwIfError(error);
-    return toCamel(data);
+    const users = toCamel(data) || [];
+    return users.map((u) => ({
+      ...u,
+      name: u.name || (u.email ? u.email.split('@')[0] : 'User'),
+      avatar: u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || u.email || 'User')}&background=random`,
+    }));
   },
 
   async getById(id) {
@@ -51,7 +56,13 @@ export const ProfileService = {
       .eq('id', id)
       .single();
     throwIfError(error);
-    return toCamel(data);
+    const u = toCamel(data);
+    if (!u) return null;
+    return {
+      ...u,
+      name: u.name || (u.email ? u.email.split('@')[0] : 'User'),
+      avatar: u.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || u.email || 'User')}&background=random`,
+    };
   },
 
   async update(id, updates) {
@@ -293,20 +304,22 @@ export const CalendarService = {
   async getAll(user) {
     let query = supabase.from('calendar_events').select('*').order('start_date');
 
-    if (user.role === 'developer') {
+    const role = typeof user === 'object' ? user?.role : null;
+    if (role === 'developer') {
       query = query.or('division.eq.developer,is_shared.eq.true');
-    } else if (user.role === 'marketing') {
+    } else if (role === 'marketing') {
       query = query.or('division.eq.marketing,is_shared.eq.true');
     }
 
     const { data, error } = await query;
     throwIfError(error);
-    return toCamel(data);
+    return toCamel(data) || [];
   },
 
   async save(eventData, user) {
     const isEditing = Boolean(eventData.id) && !eventData.id.startsWith('evt-task-') && !eventData.id.startsWith('evt-ptsk-') && !eventData.id.startsWith('evt-bill-');
-    const payload = toSnake({ ...eventData, createdBy: user.id });
+    const createdBy = typeof user === 'object' ? user?.id : user;
+    const payload = toSnake({ ...eventData, createdBy });
 
     if (isEditing) {
       const { data, error } = await supabase
