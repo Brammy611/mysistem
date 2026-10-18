@@ -64,17 +64,31 @@ export const AuthProvider = ({ children }) => {
       const { data, error } = await supabase.from('profiles').select('*');
       if (error) throw error;
       // Memetakan ke format lama (name, id, role, dll)
-      const mapped = (data || []).map(p => ({
+      const mapped = (data || []).map((p) => ({
+        ...p,
         id: p.id,
         name: p.name || (p.email ? p.email.split('@')[0] : 'User'),
-        avatar: p.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name || p.email || 'User')}&background=random`,
+        avatar:
+          p.avatar ||
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            p.name || p.email || 'User'
+          )}&background=random`,
         email: p.email,
         role: p.role,
-        division: p.role === 'developer' || p.role === 'marketing' ? p.role : 'management'
+        division:
+          p.division ||
+          (p.role === 'developer' || p.role === 'marketing' ? p.role : 'management'),
       }));
       setAllUsers(mapped);
     } catch (error) {
       console.error('Error fetching all users:', error);
+    }
+  };
+
+  const switchUser = (userId) => {
+    const target = allUsers.find((u) => u.id === userId);
+    if (target) {
+      setCurrentUser(target);
     }
   };
 
@@ -105,6 +119,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     logout,
+    switchUser,
     isOwner: currentUser?.role === 'owner',
     isDeveloper: currentUser?.role === 'developer',
     isMarketing: currentUser?.role === 'marketing',
