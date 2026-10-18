@@ -81,11 +81,10 @@ export const ProfileService = {
 
 export const TaskService = {
   async getAll(user) {
-    let query = supabase.from('tasks').select(`
-      *,
-      assignee:profiles!tasks_assignee_id_fkey(id, name, avatar, role),
-      creator:profiles!tasks_created_by_fkey(id, name)
-    `).order('created_at', { ascending: false });
+    let query = supabase
+      .from('tasks')
+      .select('*')
+      .order('created_at', { ascending: false });
 
     // Role-based filter
     if (user.role === 'developer') {
@@ -96,17 +95,62 @@ export const TaskService = {
 
     const { data, error } = await query;
     throwIfError(error);
-    return toCamel(data);
+    const tasks = toCamel(data) || [];
+
+    // Manually enrich assignee & creator from profiles
+    if (tasks.length > 0) {
+      const ids = [
+        ...new Set([
+          ...tasks.map((t) => t.assigneeId).filter(Boolean),
+          ...tasks.map((t) => t.createdBy).filter(Boolean),
+        ]),
+      ];
+      if (ids.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, name, avatar, email, role')
+          .in('id', ids);
+        const profileMap = {};
+        (profiles || []).forEach((p) => {
+          profileMap[p.id] = {
+            ...p,
+            name: p.name || (p.email ? p.email.split('@')[0] : 'User'),
+            avatar: p.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name || p.email || 'User')}&background=random`,
+          };
+        });
+        return tasks.map((t) => ({
+          ...t,
+          assignee: t.assigneeId ? profileMap[t.assigneeId] || null : null,
+          creator: t.createdBy ? profileMap[t.createdBy] || null : null,
+        }));
+      }
+    }
+    return tasks;
   },
 
   async getById(id) {
     const { data, error } = await supabase
       .from('tasks')
-      .select(`*, assignee:profiles!tasks_assignee_id_fkey(id, name, avatar)`)
+      .select('*')
       .eq('id', id)
       .single();
     throwIfError(error);
-    return toCamel(data);
+    const task = toCamel(data);
+    if (task?.assigneeId) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, name, avatar, email, role')
+        .eq('id', task.assigneeId)
+        .single();
+      if (profile) {
+        task.assignee = {
+          ...profile,
+          name: profile.name || (profile.email ? profile.email.split('@')[0] : 'User'),
+          avatar: profile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name || profile.email || 'User')}&background=random`,
+        };
+      }
+    }
+    return task;
   },
 
   async save(taskData, user) {
@@ -118,10 +162,14 @@ export const TaskService = {
       throw new Error('Akses ditolak: Hanya Owner yang berhak memberikan approval status "Done".');
     }
 
+    // Strip virtual/enriched fields that are NOT real DB columns
+    // (assignee & creator are computed by the service, not stored directly)
+    const { assignee, creator, ...cleanTaskData } = taskData;
+
     const payload = toSnake({
-      ...taskData,
+      ...cleanTaskData,
       updatedAt: now,
-      ...(isEditing ? {} : { createdBy: user.id, createdAt: now, status: taskData.status || 'To Do' }),
+      ...(isEditing ? {} : { createdBy: user.id, createdAt: now, status: cleanTaskData.status || 'To Do' }),
     });
 
     let result;
@@ -216,10 +264,29 @@ export const RequirementService = {
   async getAll() {
     const { data, error } = await supabase
       .from('requirements')
-      .select(`*, pic:profiles!requirements_pic_id_fkey(id, name, avatar)`)
+      .select('*')
       .order('created_at', { ascending: false });
     throwIfError(error);
-    return toCamel(data);
+    const reqs = toCamel(data) || [];
+
+    // Manually enrich pic from profiles
+    const picIds = [...new Set(reqs.map((r) => r.picId).filter(Boolean))];
+    if (picIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, name, avatar, email')
+        .in('id', picIds);
+      const profileMap = {};
+      (profiles || []).forEach((p) => {
+        profileMap[p.id] = {
+          ...p,
+          name: p.name || (p.email ? p.email.split('@')[0] : 'User'),
+          avatar: p.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name || p.email || 'User')}&background=random`,
+        };
+      });
+      return reqs.map((r) => ({ ...r, pic: r.picId ? profileMap[r.picId] || null : null }));
+    }
+    return reqs;
   },
 
   async save(reqData) {
