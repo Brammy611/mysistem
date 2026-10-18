@@ -85,19 +85,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const switchUser = (userId) => {
-    const target = allUsers.find((u) => u.id === userId);
-    if (target) {
-      setCurrentUser(target);
-    }
-  };
-
   const login = async (email, password) => {
     return await supabase.auth.signInWithPassword({ email, password });
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setCurrentUser(null);
+    }
   };
 
   // Mock checking permissions
@@ -119,7 +118,6 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     logout,
-    switchUser,
     isOwner: currentUser?.role === 'owner',
     isDeveloper: currentUser?.role === 'developer',
     isMarketing: currentUser?.role === 'marketing',

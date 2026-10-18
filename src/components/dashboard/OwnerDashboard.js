@@ -15,10 +15,11 @@ import {
   TrendingUp,
   CheckCircle2,
   Plus,
+  LogOut,
 } from 'lucide-react';
 
 export const OwnerDashboard = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
   const { setCurrentView, openModal, refreshTrigger } = useApp();
 
   const [personalTasks, setPersonalTasks] = useState([]);
@@ -114,7 +115,7 @@ export const OwnerDashboard = () => {
               <LayoutDashboard className="w-3.5 h-3.5" /> Owner Command Center
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
-              Selamat datang kembali, Bram! 👑
+              Selamat datang kembali, {currentUser?.name ? currentUser.name.split(' ')[0] : 'Owner'}! 👑
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
               Satu dashboard terpadu untuk mengendalikan seluruh operasional BookQu dan keuangan pribadi Anda.
@@ -135,6 +136,14 @@ export const OwnerDashboard = () => {
             >
               <Plus className="w-4 h-4" />
               <span>Buat Task Tim</span>
+            </button>
+            <button
+              onClick={logout}
+              className="px-3 py-2 bg-white/10 hover:bg-rose-600 text-white font-semibold text-xs rounded-xl transition-all flex items-center gap-1.5 backdrop-blur-xs border border-white/15"
+              title="Keluar dari sistem"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Logout</span>
             </button>
           </div>
         </div>

@@ -12,10 +12,11 @@ import {
   Plus,
   Activity,
   AlertTriangle,
+  LogOut,
 } from 'lucide-react';
 
 export const MarketingDashboard = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
   const { setCurrentView, openModal, refreshTrigger } = useApp();
 
   const [allMktTasks, setAllMktTasks] = useState([]);
@@ -88,6 +89,14 @@ export const MarketingDashboard = () => {
             >
               <span>Pipeline Board</span>
               <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={logout}
+              className="px-3.5 py-2 bg-white/10 hover:bg-rose-600 text-white font-semibold text-xs rounded-xl transition-all flex items-center gap-1.5 backdrop-blur-xs border border-white/15"
+              title="Keluar dari akun"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Logout</span>
             </button>
           </div>
         </div>

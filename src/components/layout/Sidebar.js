@@ -25,10 +25,11 @@ import {
   ChevronRight,
   ShieldAlert,
   Sparkles,
+  LogOut,
 } from 'lucide-react';
 
 export const Sidebar = ({ isOpen, onClose }) => {
-  const { currentUser, isOwner, isDeveloper, isMarketing } = useAuth();
+  const { currentUser, isOwner, isDeveloper, isMarketing, logout } = useAuth();
   const { currentView, setCurrentView } = useApp();
 
   // Collapsible sections for Owner
@@ -362,23 +363,28 @@ export const Sidebar = ({ isOpen, onClose }) => {
           )}
         </div>
 
-        {/* Security / RBAC Banner footer */}
-        <div className="p-3 border-t border-slate-200 bg-slate-50">
+        {/* Security / RBAC Banner & Logout footer */}
+        <div className="p-3 border-t border-slate-200 bg-slate-50 space-y-2">
           <div className="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200/80 shadow-xs">
             <ShieldAlert className="w-4 h-4 text-indigo-600 shrink-0" />
             <div className="overflow-hidden">
               <p className="text-[11px] font-bold text-slate-800 truncate">
-                Role: {currentUser?.name || currentUser?.role || 'User'}
+                {currentUser?.name || currentUser?.email || 'User'}
               </p>
-              <p className="text-[10px] text-slate-500 truncate">
-                {isOwner
-                  ? 'Akses Penuh Seluruh Modul'
-                  : isDeveloper
-                  ? 'Terkunci ke Divisi Dev'
-                  : 'Terkunci ke Divisi Marketing'}
+              <p className="text-[10px] text-slate-500 truncate capitalize">
+                Role: {currentUser?.role || 'User'}
               </p>
             </div>
           </div>
+
+          <button
+            onClick={logout}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors border border-rose-200/60"
+            title="Keluar dari akun"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Logout</span>
+          </button>
         </div>
       </aside>
     </>

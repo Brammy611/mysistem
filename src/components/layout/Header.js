@@ -4,7 +4,6 @@ import { useApp } from '../../context/AppContext';
 import {
   Bell,
   Search,
-  UserCheck,
   ChevronDown,
   Plus,
   ShieldCheck,
@@ -13,10 +12,12 @@ import {
   CheckCircle2,
   AlertTriangle,
   X,
+  LogOut,
+  Settings,
 } from 'lucide-react';
 
 export const Header = ({ onToggleSidebar }) => {
-  const { currentUser, allUsers, switchUser, isDeveloper, isMarketing } = useAuth();
+  const { currentUser, logout, isOwner, isDeveloper, isMarketing } = useAuth();
   const { searchQuery, setSearchQuery, notifications, openModal, setCurrentView } = useApp();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
@@ -168,8 +169,8 @@ export const Header = ({ onToggleSidebar }) => {
           )}
         </div>
 
-        {/* User / Role Switcher Widget */}
-        <div className="relative">
+        {/* User Profile Widget & Dropdown */}
+        <div className="relative flex items-center gap-2">
           <button
             onClick={() => {
               setShowUserDropdown(!showUserDropdown);
@@ -189,52 +190,67 @@ export const Header = ({ onToggleSidebar }) => {
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5" />
           </button>
 
+          {/* Quick Logout Button on Header */}
+          <button
+            onClick={logout}
+            className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all border border-slate-200/80"
+            title="Keluar (Logout)"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+
           {showUserDropdown && (
-            <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-              <div className="px-4 py-2.5 border-b border-slate-100">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Simulasi Multi-Role</p>
-                <p className="text-xs text-slate-600 mt-0.5">
-                  Ganti profil untuk memvalidasi hak akses & batasan security PRD.
-                </p>
+            <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="px-4 py-3 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={currentUser?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.name || currentUser?.email || 'User')}&background=random`}
+                    alt={currentUser?.name || 'User'}
+                    className="w-10 h-10 rounded-xl object-cover ring-2 ring-slate-100"
+                  />
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-bold text-slate-900 truncate">
+                      {currentUser?.name || 'User'}
+                    </p>
+                    <p className="text-[11px] text-slate-500 truncate">
+                      {currentUser?.email || '-'}
+                    </p>
+                    <div className="mt-1">
+                      {getRoleBadge(currentUser?.role)}
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="py-1">
-                {allUsers.map((user) => {
-                  const isCurrent = user.id === currentUser.id;
-                  return (
-                    <button
-                      key={user.id}
-                      onClick={() => {
-                        switchUser(user.id);
-                        setShowUserDropdown(false);
-                      }}
-                      className={`w-full px-4 py-2.5 flex items-center justify-between text-left hover:bg-indigo-50/60 transition-colors ${
-                        isCurrent ? 'bg-indigo-50/40' : ''
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.email || 'User')}&background=random`}
-                          alt={user.name || 'User'}
-                          className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-200"
-                        />
-                        <div>
-                          <p className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                            {user.name || user.email || 'User'}
-                            {isCurrent && <UserCheck className="w-3.5 h-3.5 text-indigo-600" />}
-                          </p>
-                          <p className="text-[11px] text-slate-500">{user.title}</p>
-                        </div>
-                      </div>
-                      <div>{getRoleBadge(user.role)}</div>
-                    </button>
-                  );
-                })}
+              <div className="p-2 space-y-1">
+                {isOwner && (
+                  <button
+                    onClick={() => {
+                      setCurrentView('settings');
+                      setShowUserDropdown(false);
+                    }}
+                    className="w-full px-3 py-2 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg flex items-center gap-2 transition-colors"
+                  >
+                    <Settings className="w-4 h-4 text-slate-500" />
+                    <span>Pengaturan & Profil</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    setShowUserDropdown(false);
+                    logout();
+                  }}
+                  className="w-full px-3 py-2 text-left text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <LogOut className="w-4 h-4 text-rose-600" />
+                  <span>Keluar (Logout)</span>
+                </button>
               </div>
 
               <div className="px-4 py-2 border-t border-slate-100 bg-slate-50 rounded-b-xl flex items-center justify-between text-[11px] text-slate-500">
-                <span>Role aktif: <strong>{currentUser.role}</strong></span>
-                <span className="text-emerald-600 font-medium">RBAC Aktif</span>
+                <span>Akun Aktif</span>
+                <span className="text-emerald-600 font-medium">Sesi Terotentikasi</span>
               </div>
             </div>
           )}
