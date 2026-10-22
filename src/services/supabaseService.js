@@ -517,6 +517,39 @@ export const CategoryService = {
     throwIfError(error);
     return toCamel(data);
   },
+
+  async save(catData, ownerId) {
+    const isEditing = Boolean(catData.id);
+    const payload = toSnake({ ...catData, ownerId });
+
+    if (isEditing) {
+      const { data, error } = await supabase
+        .from('transaction_categories')
+        .update(payload)
+        .eq('id', catData.id)
+        .select()
+        .single();
+      throwIfError(error);
+      return toCamel(data);
+    } else {
+      const newId = `cat-${Date.now()}`;
+      const { data, error } = await supabase
+        .from('transaction_categories')
+        .insert({ ...payload, id: newId })
+        .select()
+        .single();
+      throwIfError(error);
+      return toCamel(data);
+    }
+  },
+
+  async delete(catId) {
+    const { error } = await supabase
+      .from('transaction_categories')
+      .delete()
+      .eq('id', catId);
+    throwIfError(error);
+  },
 };
 
 // ─── FINANCE: TRANSACTIONS ────────────────────────────────────────────────────
@@ -712,5 +745,87 @@ export const BillService = {
     throwIfError(updateErr);
 
     return { bill: toCamel(updatedBill), transaction: tx };
+  },
+};
+
+// ─── FINANCE: INCOME ALLOCATION PLANS ────────────────────────────────────────
+
+export const AllocationPlanService = {
+  /** Fetch the plan (+ items) for a given month. Returns null if none exists. */
+  async getByMonth(ownerId, month) {
+    const { data, error } = await supabase
+      .from('income_allocation_plans')
+      .select('*, income_allocation_items(*)')
+      .eq('owner_id', ownerId)
+      .eq('month', month)
+      .maybeSingle();
+    throwIfError(error);
+    if (!data) return null;
+    const plan = toCamel(data);
+    plan.items = toCamel(data.income_allocation_items || []);
+    delete plan.incomeAllocationItems;
+    return plan;
+  },
+
+  /** Upsert the plan header and replace all items atomically. */
+  async savePlan(ownerId, month, netIncome, items) {
+    // 1. Upsert plan header
+    const { data: planRow, error: planErr } = await supabase
+      .from('income_allocation_plans')
+      .upsert(
+        {
+          owner_id: ownerId,
+          month,
+          net_income: Number(netIncome),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'owner_id,month', ignoreDuplicates: false }
+      )
+      .select()
+      .single();
+    throwIfError(planErr);
+    const planId = planRow.id;
+
+    // 2. Delete existing items
+    const { error: delErr } = await supabase
+      .from('income_allocation_items')
+      .delete()
+      .eq('plan_id', planId);
+    throwIfError(delErr);
+
+    // 3. Insert new items
+    if (items && items.length > 0) {
+      const rows = items.map((item, idx) =>
+        toSnake({
+          id: item.id || `ali-${Date.now()}-${idx}`,
+          planId,
+          categoryName: item.categoryName,
+          categoryType: item.categoryType || 'Other',
+          allocationMode: item.allocationMode || 'percentage',
+          percentage: Number(item.percentage) || 0,
+          plannedAmount: Number(item.plannedAmount) || 0,
+          displayOrder: idx,
+        })
+      );
+      const { error: insErr } = await supabase
+        .from('income_allocation_items')
+        .insert(rows);
+      throwIfError(insErr);
+    }
+
+    return toCamel(planRow);
+  },
+
+  /** Delete a plan and all its items. */
+  async deletePlan(ownerId, month) {
+    const { data: planRow } = await supabase
+      .from('income_allocation_plans')
+      .select('id')
+      .eq('owner_id', ownerId)
+      .eq('month', month)
+      .maybeSingle();
+    if (!planRow) return;
+    await supabase.from('income_allocation_items').delete().eq('plan_id', planRow.id);
+    await supabase.from('income_allocation_plans').delete().eq('id', planRow.id);
   },
 };

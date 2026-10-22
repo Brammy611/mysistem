@@ -39,6 +39,7 @@ import { AccountsView } from './components/finance/AccountsView';
 import { TransactionsView } from './components/finance/TransactionsView';
 import { BudgetsView } from './components/finance/BudgetsView';
 import { ObligationsBillsView } from './components/finance/ObligationsBillsView';
+import { IncomePlannerView } from './components/finance/IncomePlannerView';
 import { TransactionFormModal } from './components/finance/TransactionFormModal';
 import { AccountFormModal } from './components/finance/AccountFormModal';
 import { BudgetFormModal } from './components/finance/BudgetFormModal';
@@ -91,6 +92,8 @@ const MainContent = () => {
           return <AccountsView />;
         case 'finance-budgets':
           return <BudgetsView />;
+        case 'finance-planner':
+          return <IncomePlannerView />;
         case 'finance-obligations':
           return <ObligationsBillsView />;
         case 'personal-tasks':

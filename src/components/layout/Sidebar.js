@@ -26,6 +26,7 @@ import {
   ShieldAlert,
   Sparkles,
   LogOut,
+  TrendingUp,
 } from 'lucide-react';
 
 export const Sidebar = ({ isOpen, onClose }) => {
@@ -202,6 +203,13 @@ export const Sidebar = ({ isOpen, onClose }) => {
                     >
                       <PieChart className="w-3.5 h-3.5 text-amber-600" />
                       <span>Budgets</span>
+                    </button>
+                    <button
+                      onClick={() => navigateTo('finance-planner')}
+                      className={subNavItemClass(isActive('finance-planner'))}
+                    >
+                      <TrendingUp className="w-3.5 h-3.5 text-indigo-500" />
+                      <span>Budget Planner</span>
                     </button>
                     <button
                       onClick={() => navigateTo('finance-obligations')}
