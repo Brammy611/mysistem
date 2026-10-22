@@ -722,9 +722,7 @@ export const BillService = {
     if (bill.status === 'Paid') throw new Error('Tagihan ini sudah berstatus Lunas.');
 
     // 2. Create linked transaction
-    const newTxId = `trx-bill-${bill.id}`;
     const tx = await TransactionService.save({
-      id: newTxId,
       date: paymentDate || new Date().toISOString().split('T')[0],
       type: 'Expense',
       amount: bill.amount,
